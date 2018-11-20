@@ -1,8 +1,14 @@
-let crypto = require('crypto');
+const crypto = require('crypto');
+// const fs = require('fs');
+const path = require('path');
 
-let key = 'asdhjwheru*asd123-123'
+let key = 'asdhjwheru*asd123-123';
+// var publicPem = fs.readFileSync(path.join(__dirname, '../key.pem'), 'utf8');
+// var publicKey = publicPem.toString();
+// console.log(fs)
 
 var cipherMsg = function(msg) {
+    
     var cipher = crypto.createCipher('aes256', key);
     var crypted = cipher.update(msg, 'utf8', 'hex');
     crypted += cipher.final('hex');
