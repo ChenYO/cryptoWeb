@@ -1,11 +1,5 @@
 const crypto = require('crypto');
-// const fs = require('fs');
-const path = require('path');
-
-let key = 'asdhjwheru*asd123-123';
-// var publicPem = fs.readFileSync(path.join(__dirname, '../key.pem'), 'utf8');
-// var publicKey = publicPem.toString();
-// console.log(fs)
+const axios = require('axios');
 
 var cipherMsg = function(msg) {
     
@@ -24,7 +18,16 @@ var decipherMsg = function(msg) {
     return dec;
 }
 
+var rsaCipherMsg = function(msg){
+    var key = ''
+    axios.get('getKey').then(function(res){
+        key = res.data
+    });    
+}
+
+
 module.exports = {
     cipherMsg,
-    decipherMsg
+    decipherMsg,
+    rsaCipherMsg
 }

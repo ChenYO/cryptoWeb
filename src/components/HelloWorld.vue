@@ -7,6 +7,12 @@
     <button @click="decipherBtn" :disabled="isCipher">
       Decipher
     </button>
+    <button @click="rsaCipherBtn">
+      RSACipher
+    </button>
+    <button @click="rsaDecipherBtn" :disabled="isRsaCipher">
+      RSADecipher
+    </button>
     <button @click="reset">
       Reset
     </button>
@@ -14,13 +20,18 @@
       Cipher : {{cipherMsg}}
       <br>
       Decipher: {{decipherMsg}}
+      <br>
+      RSACipher: {{rsaCipherMsg}}
+      <br>
+      RSADecipher: {{rsaDecipherMsg}}
     </div>
   </div>
 </template>
 
 <script>
-let crypto = require('../cryptoAPI')
-// let crypto = require('crypto');
+// let crypto = require('../cryptoAPI');
+let axios = require('axios');
+let crypto = require('crypto');
 
 export default {
   name: 'HelloWorld',
@@ -29,28 +40,50 @@ export default {
       msg: '',
       cipherMsg: '',
       decipherMsg: '',
+      rsaCipherMsg: '',
+      rsaDecipherMsg: '',
       isCipher: true,
-      key: 'asdhjwheru*asd123-123'
+      isRsaCipher: true,
     }
   },
   methods: {
     cipherBtn : function(){
-      this.cipherMsg = crypto.cipherMsg(this.msg);
+      var $this = this;
+      axios.get('getKey').then(function(res){
+        var key = res.data
+        var cipher = crypto.createCipher('aes256', key);
+        $this.cipherMsg = cipher.update($this.msg, 'utf8', 'hex');
+        $this.cipherMsg += cipher.final('hex');
+    });    
+      
       // var md5 = crypto.createHash('md5');
       // var digest = md5.update(this.msg, 'utf8').digest('hex');
       // this.md5Msg = digest;
-      
-      
+          
       this.isCipher = false;
     },
     decipherBtn: function() {
-      this.decipherMsg = crypto.decipherMsg(this.cipherMsg);
+      var $this = this;
+        axios.get('getKey').then(function(res){
+        var key = res.data
+        var decipher = crypto.createDecipher('aes256', key);
+        $this.decipherMsg = decipher.update($this.cipherMsg, 'hex', 'utf8');
+        $this.decipherMsg += decipher.final('utf8');
+      });    
+    },
+    rsaCipherBtn: function(){
+      this.rsaCipherMsg = crypto.rsaCipherMsg(this.msg);
+      this.isRsaCipher = false;
+    },
+    rsaDecipherBtn: function(){
+
     },
     reset: function() {
       this.msg = '';
       this.cipherMsg = '';
       this.decipherMsg = '';
       this.isCipher = true;
+      this.isRsaCipher = true;
     }
   }
 }
