@@ -47,24 +47,29 @@ export default {
     }
   },
   methods: {
+    //Using axios to get key, then encrypt message with AES
     cipherBtn : function(){
       var $this = this;
+
       axios.get('getKey').then(function(res){
+        $this.isCipher = false;
         var key = res.data
         var cipher = crypto.createCipher('aes256', key);
         $this.cipherMsg = cipher.update($this.msg, 'utf8', 'hex');
         $this.cipherMsg += cipher.final('hex');
+
     });    
       
       // var md5 = crypto.createHash('md5');
       // var digest = md5.update(this.msg, 'utf8').digest('hex');
       // this.md5Msg = digest;
           
-      this.isCipher = false;
     },
+    //Decrypting message
     decipherBtn: function() {
       var $this = this;
-        axios.get('getKey').then(function(res){
+
+      axios.get('getKey').then(function(res){
         var key = res.data
         var decipher = crypto.createDecipher('aes256', key);
         $this.decipherMsg = decipher.update($this.cipherMsg, 'hex', 'utf8');
@@ -72,11 +77,37 @@ export default {
       });    
     },
     rsaCipherBtn: function(){
-      this.rsaCipherMsg = crypto.rsaCipherMsg(this.msg);
-      this.isRsaCipher = false;
+      var $this = this;
+
+      axios.get('getPublicKey').then(function(res){
+        $this.isRsaCipher = false;
+        var publicKey = res.data
+        
+        var bufferData = new Buffer($this.msg);
+        var encrypted = crypto.publicEncrypt(publicKey, bufferData);
+        $this.rsaCipherMsg = encrypted.toString('base64'); 
+
+        // var decipher = crypto.createDecipher('aes256', key);
+        // $this.rsaCipherMsg = decipher.update($this.msg, 'hex', 'utf8');
+        // $this.rsaCipherMsg += decipher.final('utf8');
+      });  
+      
     },
     rsaDecipherBtn: function(){
+      var $this = this;
 
+      axios.get('getPrivateKey').then(function(res){
+        $this.isRsaCipher = false;
+        var privateKey = res.data
+        
+        var bufferData = new Buffer($this.rsaCipherMsg, 'base64');
+        var encrypted = crypto.privateDecrypt(privateKey, bufferData);
+        $this.rsaDecipherMsg = encrypted.toString('utf8'); 
+
+        // var decipher = crypto.createDecipher('aes256', key);
+        // $this.rsaCipherMsg = decipher.update($this.msg, 'hex', 'utf8');
+        // $this.rsaCipherMsg += decipher.final('utf8');
+      });  
     },
     reset: function() {
       this.msg = '';

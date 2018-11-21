@@ -11,12 +11,18 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
+      '/getPublicKey': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      },
       '/getKey': {
         target: 'http://localhost:3000',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/getKey': '/getKey'
-        }
+        changeOrigin: true
+      },
+      
+      '/getPrivateKey': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
       }
     },
 
