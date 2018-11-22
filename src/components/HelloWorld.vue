@@ -31,12 +31,12 @@
       <font color='red'>Decipher: </font>{{decipherMsg}}
       <br>
       <h3>非對稱式加密</h3>
-      <font color='red'>RSAEncrypt: </font>{{rsaCipherMsg}}
+      <font color='red'>RSAEncrypt: </font>{{rsaCipherMsg.join('')}}
       <br>
       <font color='red'>RSADecrypt: </font>{{rsaDecipherMsg}}
 
       <h3>對稱式加密明文，非對稱式加密密文</h3>
-      <font color='red'>Aes_RsaEncrypt: </font>{{encryptedSection}}
+      <font color='red'>Aes_RsaEncrypt: </font>{{encryptedSection.join('')}}
       <br>
       <font color='red'>Aes_RSADecrypt: </font>{{rsaDecryptedMsg}}
     </div>
@@ -55,7 +55,7 @@ export default {
       msg: '',
       cipherMsg: '',
       decipherMsg: '',
-      rsaCipherMsg: '',
+      rsaCipherMsg: [],
       rsaDecipherMsg: '',
       rsaEncryptedMsg: '',
       rsaDecryptedMsg: '',
@@ -102,10 +102,17 @@ export default {
         $this.isRsaCipher = false;
         var publicKey = res.data
         
-        var bufferData = new Buffer($this.msg);
-        var encrypted = crypto.publicEncrypt(publicKey, bufferData);
-        $this.rsaCipherMsg = encrypted.toString('base64'); 
-
+        var pivot = 130;
+        var rsaEncryptedSection = []
+        for(var i = 0 ; i < $this.msg.length ; i += pivot) {
+          var section = $this.msg.substring(i, i + pivot);
+          rsaEncryptedSection.push(section)
+        }
+        for(var data of rsaEncryptedSection){
+          var bufferData = new Buffer(data);
+          var encrypted = crypto.publicEncrypt(publicKey, bufferData);
+          $this.rsaCipherMsg.push(encrypted.toString('base64')); 
+        }
       });  
     },
     // RSA : Using private key to decrypt
@@ -116,10 +123,11 @@ export default {
         $this.isRsaCipher = false;
         var privateKey = res.data
         
-        var bufferData = new Buffer($this.rsaCipherMsg, 'base64');
-        var encrypted = crypto.privateDecrypt(privateKey, bufferData);
-        $this.rsaDecipherMsg = encrypted.toString('utf8'); 
-
+        for(var data of $this.rsaCipherMsg) {
+          var bufferData = new Buffer(data, 'base64');
+          var encrypted = crypto.privateDecrypt(privateKey, bufferData);
+          $this.rsaDecipherMsg += encrypted.toString('utf8'); 
+        }
       });  
     },
     /*  Using AES to encrypt data, then using RSA to encrypt AES code.
@@ -138,7 +146,7 @@ export default {
 
        
         //將密文分段以RSA加密
-        var pivot = 50;
+        var pivot = 130;
         var rsaEncryptedSection = []
         for(var i = 0 ; i < aesEnctypted.length ; i += pivot) {
           var section = aesEnctypted.substring(i, i + pivot);
@@ -186,7 +194,7 @@ export default {
       this.msg = '';
       this.cipherMsg = '';
       this.decipherMsg = '';
-      this.rsaCipherMsg = '';
+      this.rsaCipherMsg = [];
       this.rsaDecipherMsg = '';
       this.rsaEncryptedMsg = '';
       this.rsaDecryptedMsg = '';
